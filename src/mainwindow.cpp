@@ -34,5 +34,19 @@ License:
 #include "mainwindow.hpp"
 
 tffm::MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
+    _centralWidget = std::make_unique<QWidget>();
 
+    _mainLayout = std::make_unique<QVBoxLayout>();
+    _mainLayout->setMargin(0);
+
+    _fsView = std::make_unique<QListView>();
+
+    _fsModel = std::make_unique<QFileSystemModel>();
+    _fsModel->setRootPath(QDir::homePath());
+
+    _fsView->setModel(_fsModel.get());
+    _fsView->setRootIndex(_fsModel->index(QDir::homePath()));
+    _mainLayout->addWidget(_fsView.get());
+    _centralWidget->setLayout(_mainLayout.get());
+    this->setCentralWidget(_centralWidget.get());
 }

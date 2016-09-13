@@ -34,7 +34,12 @@ License:
 #ifndef MAINWINDOW_HPP
 #define MAINWINDOW_HPP
 
+#include <memory>
+
 #include <QMainWindow>
+#include <QVBoxLayout>
+#include <QListView>
+#include <QFileSystemModel>
 
 namespace tffm { class MainWindow; }
 
@@ -47,6 +52,12 @@ class tffm::MainWindow : public QMainWindow {
     signals:
 
     public slots:
+
+    private:
+        std::unique_ptr<QWidget> _centralWidget;
+        std::unique_ptr<QVBoxLayout> _mainLayout;
+        std::unique_ptr<QListView> _fsView;
+        std::unique_ptr<QFileSystemModel> _fsModel;
 };
 
 #endif // MAINWINDOW_HPP
