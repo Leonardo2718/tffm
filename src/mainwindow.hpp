@@ -40,6 +40,7 @@ License:
 #include <QVBoxLayout>
 #include <QListView>
 #include <QFileSystemModel>
+#include <QString>
 
 namespace tffm { class MainWindow; }
 
@@ -58,6 +59,9 @@ class tffm::MainWindow : public QMainWindow {
         std::unique_ptr<QVBoxLayout> _mainLayout;
         std::unique_ptr<QListView> _fsView;
         std::unique_ptr<QFileSystemModel> _fsModel;
+
+        void change_directory(QString const& path);
+        /*  changes the directory being displayed to `path` */
 };
 
 #endif // MAINWINDOW_HPP

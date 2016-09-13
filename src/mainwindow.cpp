@@ -34,19 +34,29 @@ License:
 #include "mainwindow.hpp"
 
 tffm::MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
+    // allocate members
     _centralWidget = std::make_unique<QWidget>();
-
     _mainLayout = std::make_unique<QVBoxLayout>();
+    _fsView = std::make_unique<QListView>();
+    _fsModel = std::make_unique<QFileSystemModel>();
+
+    // configure layout
     _mainLayout->setMargin(0);
 
-    _fsView = std::make_unique<QListView>();
-
-    _fsModel = std::make_unique<QFileSystemModel>();
-    _fsModel->setRootPath(QDir::homePath());
-
+    // set widgets
     _fsView->setModel(_fsModel.get());
-    _fsView->setRootIndex(_fsModel->index(QDir::homePath()));
     _mainLayout->addWidget(_fsView.get());
     _centralWidget->setLayout(_mainLayout.get());
     this->setCentralWidget(_centralWidget.get());
+
+    // move to home directory
+    change_directory(QDir::homePath());
+}
+
+/*
+changes the directory being displayed to `path`
+*/
+void tffm::MainWindow::change_directory(QString const& path) {
+    auto rootIndex = _fsModel->setRootPath(path);
+    _fsView->setRootIndex(rootIndex);
 }
