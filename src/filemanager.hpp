@@ -31,19 +31,28 @@ License:
     SOFTWARE.
 */
 
-#include "mainwindow.hpp"
+#ifndef FILEMANAGER_HPP
+#define FILEMANAGER_HPP
 
-tffm::MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
-    // allocate members
-    _centralWidget = std::make_unique<QWidget>();
-    _mainLayout = std::make_unique<QVBoxLayout>();
-    _fileManager = std::make_unique<FileManager>(this);
+#include <memory>
 
-    // configure layout
-    _mainLayout->setMargin(0);
+#include <QListView>
+#include <QFileSystemModel>
+#include <QString>
 
-    // set widgets
-    _mainLayout->addWidget(_fileManager.get());
-    _centralWidget->setLayout(_mainLayout.get());
-    this->setCentralWidget(_centralWidget.get());
-}
+namespace tffm { class FileManager; }
+
+class tffm::FileManager : public QListView {
+    Q_OBJECT
+
+    public:
+        explicit FileManager(QWidget* parent = nullptr);
+
+    private:
+        std::unique_ptr<QFileSystemModel> _fsModel;
+
+        void change_directory(QString const& path);
+        /*  changes the directory being displayed to `path` */
+};
+
+#endif // FILEMANAGER

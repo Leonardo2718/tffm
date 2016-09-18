@@ -31,19 +31,26 @@ License:
     SOFTWARE.
 */
 
-#include "mainwindow.hpp"
+#include "filemanager.hpp"
 
-tffm::MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
-    // allocate members
-    _centralWidget = std::make_unique<QWidget>();
-    _mainLayout = std::make_unique<QVBoxLayout>();
-    _fileManager = std::make_unique<FileManager>(this);
+#include <QScrollBar>
 
-    // configure layout
-    _mainLayout->setMargin(0);
+tffm::FileManager::FileManager(QWidget* parent) : QListView{parent} {
+    _fsModel = std::make_unique<QFileSystemModel>();
 
-    // set widgets
-    _mainLayout->addWidget(_fileManager.get());
-    _centralWidget->setLayout(_mainLayout.get());
-    this->setCentralWidget(_centralWidget.get());
+    // configure widget
+    setModel(_fsModel.get());
+    setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+
+    // move to home directory
+    change_directory(QDir::homePath());
+}
+
+/*
+changes the directory being displayed to `path`
+*/
+void tffm::FileManager::change_directory(QString const& path) {
+    auto rootIndex = _fsModel->setRootPath(path);
+    setRootIndex(rootIndex);
 }

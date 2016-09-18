@@ -16,7 +16,7 @@ find_package(Qt5Gui REQUIRED)
 find_package(Qt5Widgets REQUIRED)
 
 # specify the project files
-add_executable(tffm src/tffm.cpp src/mainwindow.cpp)
+add_executable(tffm src/tffm.cpp src/mainwindow.cpp src/filemanager.cpp)
 
 # specify the libraries to be linked
 target_link_libraries(tffm Qt5Core Qt5::Gui Qt5::Widgets)

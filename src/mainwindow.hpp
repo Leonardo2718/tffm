@@ -39,8 +39,9 @@ License:
 #include <QMainWindow>
 #include <QVBoxLayout>
 #include <QListView>
-#include <QFileSystemModel>
 #include <QString>
+
+#include "filemanager.hpp"
 
 namespace tffm { class MainWindow; }
 
@@ -48,7 +49,7 @@ class tffm::MainWindow : public QMainWindow {
         Q_OBJECT
 
     public:
-        explicit MainWindow(QWidget *parent = nullptr);
+        explicit MainWindow(QWidget* parent = nullptr);
 
     signals:
 
@@ -57,11 +58,7 @@ class tffm::MainWindow : public QMainWindow {
     private:
         std::unique_ptr<QWidget> _centralWidget;
         std::unique_ptr<QVBoxLayout> _mainLayout;
-        std::unique_ptr<QListView> _fsView;
-        std::unique_ptr<QFileSystemModel> _fsModel;
-
-        void change_directory(QString const& path);
-        /*  changes the directory being displayed to `path` */
+        std::unique_ptr<FileManager> _fileManager;
 };
 
 #endif // MAINWINDOW_HPP
