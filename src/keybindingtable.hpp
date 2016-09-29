@@ -31,53 +31,35 @@ License:
     SOFTWARE.
 */
 
-#ifndef FILEMANAGER_HPP
-#define FILEMANAGER_HPP
-
-// project headers
-#include "keybindingtable.hpp"
+#ifndef KEYBINDINGTABLE_HPP
+#define KEYBINDINGTABLE_HPP
 
 // standard libraries
 #include <memory>
+#include <vector>
 
 // Qt classes
-#include <QListView>
-#include <QFileSystemModel>
-#include <QString>
+#include <QWidget>
+#include <QShortcut>
 
-namespace tffm { class FileManager; }
+namespace tffm {
+    class KeyBindingTable;
+}
 
-class tffm::FileManager : public QListView {
-    Q_OBJECT
-
+class tffm::KeyBindingTable {
     public:
-        explicit FileManager(QWidget* parent = nullptr);
+        explicit KeyBindingTable(QWidget* parent) :_parent{parent} {}
 
-    public slots:
-        void moveSelectionUp();
-        void moveSelectionDown();
-        void moveSelectionTop();
-        void moveSelectionBottom();
-
-        void enterSelectedDirectory();
-        void cdUp();
-
-        void openCurrent();
-
-    protected:
-        void keyPressEvent(QKeyEvent* event) override;
-        void moveSelection(QAbstractItemView::CursorAction action);
+        void add(QKeySequence const& keys, const char* slot) {
+            auto s = std::make_unique<QShortcut>(keys, _parent);
+            QObject::connect(s.get(), SIGNAL(activated()), _parent, slot);
+            //connect(s.get(), SIGNAL(activatedAmbiguously()), _parent, slot);
+            _keyBindings.push_back(std::move(s));
+        }
 
     private:
-        std::unique_ptr<QFileSystemModel> _fsModel;
-        KeyBindingTable _keyBindings;
-        QString _pathWaitingToBeLoaded;
-
-        void change_directory(QString const& path);
-        /*  changes the directory being displayed to `path` */
-
-    private slots:
-        void selectFirstChildIfNeeded(const QString& path);
+        QWidget* _parent;
+        std::vector<std::unique_ptr<QShortcut>> _keyBindings;
 };
 
-#endif // FILEMANAGER
+#endif // KEYBINDINGTABLE_HPP
