@@ -99,6 +99,8 @@ void tffm::FileManager::moveSelectionBottom() {
 }
 
 void tffm::FileManager::enterSelectedDirectory() {
+    if (!_fsModel->isDir(currentIndex())) return;
+
     auto selectedPath = _fsModel->filePath(currentIndex());
     change_directory(selectedPath);
 
