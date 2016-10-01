@@ -31,36 +31,22 @@ License:
     SOFTWARE.
 */
 
-#ifndef MAINWINDOW_HPP
-#define MAINWINDOW_HPP
+// project headers
+#include "keybindingtable.hpp"
 
-#include <memory>
+tffm::EnterKeyReceiver::EnterKeyReceiver(Callable f) : _f{f} {}
 
-#include <QMainWindow>
-#include <QVBoxLayout>
-#include <QListView>
-#include <QString>
-
-#include "filemanager.hpp"
-#include "inputline.hpp"
-
-namespace tffm { class MainWindow; }
-
-class tffm::MainWindow : public QMainWindow {
-        Q_OBJECT
-
-    public:
-        explicit MainWindow(QWidget* parent = nullptr);
-
-    signals:
-
-    public slots:
-
-    private:
-        std::unique_ptr<QWidget> _centralWidget;
-        std::unique_ptr<QVBoxLayout> _mainLayout;
-        std::unique_ptr<FileManager> _fileManager;
-        std::unique_ptr<InputLine> _inputLine;
-};
-
-#endif // MAINWINDOW_HPP
+bool tffm::EnterKeyReceiver::eventFilter(QObject* obj, QEvent* event) {
+    if (event->type()==QEvent::KeyPress) {
+    QKeyEvent* key = static_cast<QKeyEvent*>(event);
+    if ( (key->key()==Qt::Key_Enter) || (key->key()==Qt::Key_Return) ) {
+        _f();
+    } else {
+        return QObject::eventFilter(obj, event);
+    }
+        return true;
+    } else {
+        return QObject::eventFilter(obj, event);
+    }
+    return false;
+}

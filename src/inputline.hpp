@@ -31,36 +31,35 @@ License:
     SOFTWARE.
 */
 
-#ifndef MAINWINDOW_HPP
-#define MAINWINDOW_HPP
+#ifndef INPUTLINE_HPP
+#define INPUTLINE_HPP
 
-#include <memory>
+// project headers
+#include "keybindingtable.hpp"
 
-#include <QMainWindow>
-#include <QVBoxLayout>
-#include <QListView>
-#include <QString>
+// Qt classes
+#include <QLineEdit>
 
-#include "filemanager.hpp"
-#include "inputline.hpp"
+namespace tffm {
+class InputLine;
+}
 
-namespace tffm { class MainWindow; }
-
-class tffm::MainWindow : public QMainWindow {
-        Q_OBJECT
+class tffm::InputLine : public QLineEdit {
+    Q_OBJECT
 
     public:
-        explicit MainWindow(QWidget* parent = nullptr);
-
-    signals:
+        explicit InputLine(QWidget *parent);
 
     public slots:
+        void enterSearchMode();
+        void leaveSearchMode();
+        void tryLeaveSearchMode(QString const& text);
 
     private:
-        std::unique_ptr<QWidget> _centralWidget;
-        std::unique_ptr<QVBoxLayout> _mainLayout;
-        std::unique_ptr<FileManager> _fileManager;
-        std::unique_ptr<InputLine> _inputLine;
+        enum class Mode {None, Command, Search};
+
+        KeyBindingTable _keyBindings;
+        Mode _currentMode;
 };
 
-#endif // MAINWINDOW_HPP
+#endif // INPUTLINE_HPP

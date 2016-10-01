@@ -37,29 +37,60 @@ License:
 // standard libraries
 #include <memory>
 #include <vector>
+#include <functional>
 
 // Qt classes
+#include <QObject>
+#include <QEvent>
+#include <QKeyEvent>
 #include <QWidget>
 #include <QShortcut>
 
 namespace tffm {
+    class EnterKeyReceiver;
     class KeyBindingTable;
 }
 
+/*
+even handler for `Enter` key events
+*/
+class tffm::EnterKeyReceiver : public QObject {
+    Q_OBJECT
+    public:
+        using Callable = std::function<void(void)>;
+        explicit EnterKeyReceiver(Callable f);
+
+    protected:
+        bool eventFilter(QObject* obj, QEvent* event) override;
+
+    private:
+        Callable _f;
+};
+
 class tffm::KeyBindingTable {
     public:
-        explicit KeyBindingTable(QWidget* parent) :_parent{parent} {}
+        explicit KeyBindingTable(QWidget* emitter, QWidget* reciever = nullptr) :_emitter{emitter}, _reciever{reciever ? reciever : emitter} {}
 
         void add(QKeySequence const& keys, const char* slot) {
-            auto s = std::make_unique<QShortcut>(keys, _parent);
-            QObject::connect(s.get(), SIGNAL(activated()), _parent, slot);
-            //connect(s.get(), SIGNAL(activatedAmbiguously()), _parent, slot);
+            auto s = std::make_unique<QShortcut>(keys, _emitter);
+            QObject::connect(s.get(), SIGNAL(activated()), _reciever, slot);
+            //connect(s.get(), SIGNAL(activatedAmbiguously()), _emitter, slot);
             _keyBindings.push_back(std::move(s));
         }
 
+        /*  a special function is needed to handle the `Enter` key, which need an event filter to be handled */
+        void addEnterKeyBinding(EnterKeyReceiver::Callable f) {
+            auto r = std::make_unique<EnterKeyReceiver>(f);
+            _emitter->installEventFilter(r.get());
+            _enterKeyReceivers.push_back(std::move(r));
+        }
+
     private:
-        QWidget* _parent;
+
+        QWidget* _emitter;
+        QWidget* _reciever;
         std::vector<std::unique_ptr<QShortcut>> _keyBindings;
+        std::vector<std::unique_ptr<EnterKeyReceiver>> _enterKeyReceivers;
 };
 
 #endif // KEYBINDINGTABLE_HPP

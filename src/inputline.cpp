@@ -31,36 +31,41 @@ License:
     SOFTWARE.
 */
 
-#ifndef MAINWINDOW_HPP
-#define MAINWINDOW_HPP
-
-#include <memory>
-
-#include <QMainWindow>
-#include <QVBoxLayout>
-#include <QListView>
-#include <QString>
-
-#include "filemanager.hpp"
+// project headers
 #include "inputline.hpp"
 
-namespace tffm { class MainWindow; }
+// Qt classes
+#include <QKeyEvent>
 
-class tffm::MainWindow : public QMainWindow {
-        Q_OBJECT
+tffm::InputLine::InputLine(QWidget* parent) : QLineEdit{parent}, _keyBindings{parent, this}, _currentMode{Mode::None} {
+    // set key bindings
+    _keyBindings.add(QKeySequence{Qt::Key_Slash}, SLOT(enterSearchMode()));
+    _keyBindings.add(QKeySequence{Qt::Key_Escape}, SLOT(leaveSearchMode()));
+    _keyBindings.addEnterKeyBinding( [this](){this->leaveSearchMode();} );
 
-    public:
-        explicit MainWindow(QWidget* parent = nullptr);
+    // connect signals to slots
+    connect(this, SIGNAL(textChanged(QString)), this, SLOT(tryLeaveSearchMode(QString)));
 
-    signals:
+    // setup widget
+    setHidden(true);
+}
 
-    public slots:
+void tffm::InputLine::enterSearchMode() {
+    grabKeyboard();
+    setHidden(false);
+    setText("/");
+    _currentMode = Mode::Search;
+}
 
-    private:
-        std::unique_ptr<QWidget> _centralWidget;
-        std::unique_ptr<QVBoxLayout> _mainLayout;
-        std::unique_ptr<FileManager> _fileManager;
-        std::unique_ptr<InputLine> _inputLine;
-};
+void tffm::InputLine::leaveSearchMode() {
+    _currentMode = Mode::Search;
+    setHidden(true);
+    clear();
+    releaseKeyboard();
+}
 
-#endif // MAINWINDOW_HPP
+void tffm::InputLine::tryLeaveSearchMode(QString const& text) {
+    if (text == "") {
+        leaveSearchMode();
+    }
+}

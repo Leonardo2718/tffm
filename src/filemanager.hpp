@@ -64,6 +64,15 @@ class tffm::FileManager : public QListView {
 
         void openCurrent();
 
+        void searchFor(const QString& pattern);
+        /*  searches for the next of occurrence of `pattern`, processing it
+            (removing leading character, assuming it came from a command)
+            and assigning it to `_searchPattern`
+        */
+
+        void searchNext();
+        /*  searches for the next occurrence of `_searchPattern`*/
+
     protected:
         void keyPressEvent(QKeyEvent* event) override;
         void moveSelection(QAbstractItemView::CursorAction action);
@@ -72,9 +81,25 @@ class tffm::FileManager : public QListView {
         std::unique_ptr<QFileSystemModel> _fsModel;
         KeyBindingTable _keyBindings;
         QString _pathWaitingToBeLoaded;
+        QString _searchPattern;
 
         void change_directory(QString const& path);
         /*  changes the directory being displayed to `path` */
+
+        // some convienience functions
+
+        template <typename QSTRING>
+        static bool isAllLower(QSTRING&& s){
+            for (auto&& c : s)
+                if (c.isUpper())
+                    return false;
+            return true;
+        }
+
+        template <typename QMODELINDEX>
+        static QModelIndex nextSibling(QMODELINDEX&& i) {
+            return i.sibling((i.row() + 1) % i.model()->rowCount(i.parent()), i.column());
+        }
 
     private slots:
         void selectFirstChildIfNeeded(const QString& path);

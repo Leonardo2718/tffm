@@ -37,10 +37,12 @@ License:
 #include <QScrollBar>
 #include <QKeySequence>
 #include <QDesktopServices>
+#include <QRegularExpression>
 #include <QDebug>
 
 tffm::FileManager::FileManager(QWidget* parent) : QListView{parent}, _keyBindings{this} {
     _fsModel = std::make_unique<QFileSystemModel>();
+    _searchPattern = QString{};
 
     // configure widget
     setModel(_fsModel.get());
@@ -63,6 +65,8 @@ tffm::FileManager::FileManager(QWidget* parent) : QListView{parent}, _keyBinding
 
     _keyBindings.add(QKeySequence{Qt::Key_O}, SLOT(openCurrent()));
     _keyBindings.add(QKeySequence{Qt::Key_Space}, SLOT(openCurrent()));
+
+    _keyBindings.add(QKeySequence{Qt::Key_N}, SLOT(searchNext()));
 
     // connect signals to slots
     connect(_fsModel.get(), SIGNAL(directoryLoaded(QString)), this, SLOT(selectFirstChildIfNeeded(QString)));
@@ -123,6 +127,59 @@ void tffm::FileManager::openCurrent() {
     }
     else {
         QDesktopServices::openUrl(QUrl{tr("file:///") + _fsModel->filePath(ci)});
+    }
+}
+
+/*
+searches for the next of occurence of `pattern`, processing it
+(removing leading character, assuming it came from a command)
+and assigning it to `_searchPAttern`
+*/
+void tffm::FileManager::searchFor(QString const& pattern) {
+    if (pattern.isEmpty()) return;
+
+    // process `pattern`
+    _searchPattern = pattern;
+    _searchPattern.remove(0, 1); // remove first character (the slash)
+
+    // search for an occurrence of the pattern
+    Qt::CaseSensitivity caseSensitivity = isAllLower(_searchPattern) ? Qt::CaseInsensitive : Qt::CaseSensitive;
+    auto i = currentIndex();
+    while (true) {
+        if (!i.isValid()) {
+            break;
+        }
+        else if (i.data(Qt::DisplayRole).toString().startsWith(_searchPattern, caseSensitivity)) {
+            // found a match, so select it
+            setCurrentIndex(i);
+            break;
+        }
+        else if (nextSibling(i) != currentIndex()) { // if the next sibling (row) is the current index,
+            i = nextSibling(i);                      // then we've found nothing and wrapped around
+        }
+        else {
+            break;
+        }
+    }
+}
+
+/*
+searches for the next occurrence of `_searchPattern`
+*/
+void tffm::FileManager::searchNext() {
+    // search for the next occurrence of the pattern
+    Qt::CaseSensitivity caseSensitivity = isAllLower(_searchPattern) ? Qt::CaseInsensitive : Qt::CaseSensitive;
+    auto i = currentIndex();
+    while (true) {
+        i = nextSibling(i);
+        if (!i.isValid() || i == currentIndex()) { // if we're back to the current index,
+            break;                                 // then we've found nothing and wrapped around
+        }
+        else if (i.data(Qt::DisplayRole).toString().startsWith(_searchPattern, caseSensitivity)) {
+            // found a match, so select it
+            setCurrentIndex(i);
+            break;
+        }
     }
 }
 

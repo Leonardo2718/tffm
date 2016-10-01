@@ -38,12 +38,17 @@ tffm::MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
     _centralWidget = std::make_unique<QWidget>();
     _mainLayout = std::make_unique<QVBoxLayout>();
     _fileManager = std::make_unique<FileManager>(this);
+    _inputLine = std::make_unique<InputLine>(this);
 
     // configure layout
     _mainLayout->setMargin(0);
 
+    // connect signals to slots
+    connect(_inputLine.get(), SIGNAL(textChanged(QString)), _fileManager.get(), SLOT(searchFor(QString)));
+
     // set widgets
     _mainLayout->addWidget(_fileManager.get());
+    _mainLayout->addWidget(_inputLine.get());
     _centralWidget->setLayout(_mainLayout.get());
     this->setCentralWidget(_centralWidget.get());
 }
