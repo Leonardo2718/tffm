@@ -40,11 +40,12 @@ License:
 tffm::InputLine::InputLine(QWidget* parent) : QLineEdit{parent}, _keyBindings{parent, this}, _currentMode{Mode::None} {
     // set key bindings
     _keyBindings.add(QKeySequence{Qt::Key_Slash}, SLOT(enterSearchMode()));
-    _keyBindings.add(QKeySequence{Qt::Key_Escape}, SLOT(leaveSearchMode()));
-    _keyBindings.addEnterKeyBinding( [this](){this->leaveSearchMode();} );
+    _keyBindings.add(QKeySequence{Qt::Key_Question}, SLOT(enterReverseSearchMode()));
+    _keyBindings.add(QKeySequence{Qt::Key_Escape}, SLOT(leave()));
+    _keyBindings.addEnterKeyBinding( [this](){this->leave();} );
 
     // connect signals to slots
-    connect(this, SIGNAL(textChanged(QString)), this, SLOT(tryLeaveSearchMode(QString)));
+    connect(this, SIGNAL(textChanged(QString)), this, SLOT(tryLeave(QString)));
 
     // setup widget
     setHidden(true);
@@ -57,15 +58,22 @@ void tffm::InputLine::enterSearchMode() {
     _currentMode = Mode::Search;
 }
 
-void tffm::InputLine::leaveSearchMode() {
-    _currentMode = Mode::Search;
+void tffm::InputLine::enterReverseSearchMode() {
+    grabKeyboard();
+    setHidden(false);
+    setText("?");
+    _currentMode = Mode::ReverseSearch;
+}
+
+void tffm::InputLine::leave() {
+    _currentMode = Mode::None;
     setHidden(true);
     clear();
     releaseKeyboard();
 }
 
-void tffm::InputLine::tryLeaveSearchMode(QString const& text) {
+void tffm::InputLine::tryLeave(QString const& text) {
     if (text == "") {
-        leaveSearchMode();
+        leave();
     }
 }

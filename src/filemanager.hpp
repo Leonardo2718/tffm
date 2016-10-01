@@ -39,6 +39,7 @@ License:
 
 // standard libraries
 #include <memory>
+#include <utility>
 
 // Qt classes
 #include <QListView>
@@ -73,6 +74,9 @@ class tffm::FileManager : public QListView {
         void searchNext();
         /*  searches for the next occurrence of `_searchPattern`*/
 
+        void searchPrevious();
+        /*  searches for the previous occurrence of `_searchPattern`*/
+
     protected:
         void keyPressEvent(QKeyEvent* event) override;
         void moveSelection(QAbstractItemView::CursorAction action);
@@ -82,9 +86,33 @@ class tffm::FileManager : public QListView {
         KeyBindingTable _keyBindings;
         QString _pathWaitingToBeLoaded;
         QString _searchPattern;
+        bool _searchInReverse;
+        Qt::CaseSensitivity _searchCaseSensitivity;
 
         void change_directory(QString const& path);
         /*  changes the directory being displayed to `path` */
+
+        /*
+        searches for the next occurrence of `_searchPattern`
+        */
+        template <typename Predicate, typename CircularIterator, typename NextSiblingFunction>
+        static auto cirularSearch(Predicate&& pred, CircularIterator&& startPoint, NextSiblingFunction&& next) -> std::pair<bool, CircularIterator>{
+            auto i = startPoint;
+            while (i.isValid()) {
+                if (pred(i)) {
+                    return std::make_pair(true, i);
+                }
+                i = next(i);
+                if (i == startPoint) { // if we're back to the start,
+                    break;             // then we've found nothing and wrapped around
+                }
+            }
+            return std::make_pair(false, i);
+        }
+
+        bool indexMatchsSearchPattern(const QModelIndex& i) {
+            return i.data(Qt::DisplayRole).toString().startsWith(_searchPattern, _searchCaseSensitivity);
+        }
 
         // some convienience functions
 
@@ -96,9 +124,16 @@ class tffm::FileManager : public QListView {
             return true;
         }
 
-        template <typename QMODELINDEX>
-        static QModelIndex nextSibling(QMODELINDEX&& i) {
+        //template <typename QMODELINDEX>
+        //static QModelIndex nextSibling(QMODELINDEX&& i) {
+        static QModelIndex nextSibling(QModelIndex const& i) {
             return i.sibling((i.row() + 1) % i.model()->rowCount(i.parent()), i.column());
+        }
+
+        //template <typename QMODELINDEX>
+        //static QModelIndex previousSibling(QMODELINDEX&& i) {
+        static QModelIndex previousSibling(QModelIndex const& i) {
+            return i.sibling(i.row() > 0 ? (i.row() - 1) : i.model()->rowCount(i.parent()) - 1, i.column());
         }
 
     private slots:

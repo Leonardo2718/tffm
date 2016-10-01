@@ -52,11 +52,12 @@ class tffm::InputLine : public QLineEdit {
 
     public slots:
         void enterSearchMode();
-        void leaveSearchMode();
-        void tryLeaveSearchMode(QString const& text);
+        void enterReverseSearchMode();
+        void leave();
+        void tryLeave(QString const& text);
 
     private:
-        enum class Mode {None, Command, Search};
+        enum class Mode {None, Command, Search, ReverseSearch};
 
         KeyBindingTable _keyBindings;
         Mode _currentMode;

@@ -43,6 +43,7 @@ License:
 tffm::FileManager::FileManager(QWidget* parent) : QListView{parent}, _keyBindings{this} {
     _fsModel = std::make_unique<QFileSystemModel>();
     _searchPattern = QString{};
+    _searchInReverse = false;
 
     // configure widget
     setModel(_fsModel.get());
@@ -67,6 +68,7 @@ tffm::FileManager::FileManager(QWidget* parent) : QListView{parent}, _keyBinding
     _keyBindings.add(QKeySequence{Qt::Key_Space}, SLOT(openCurrent()));
 
     _keyBindings.add(QKeySequence{Qt::Key_N}, SLOT(searchNext()));
+    _keyBindings.add(QKeySequence{Qt::SHIFT + Qt::Key_N}, SLOT(searchPrevious()));
 
     // connect signals to slots
     connect(_fsModel.get(), SIGNAL(directoryLoaded(QString)), this, SLOT(selectFirstChildIfNeeded(QString)));
@@ -143,45 +145,40 @@ void tffm::FileManager::searchFor(QString const& pattern) {
     // process `pattern`
     _searchPattern = pattern;
     _searchPattern.remove(0, 1); // remove first character (the slash)
+    _searchInReverse = (pattern[0] == '?');
+    _searchCaseSensitivity = isAllLower(_searchPattern) ? Qt::CaseInsensitive : Qt::CaseSensitive;
 
     // search for an occurrence of the pattern
-    Qt::CaseSensitivity caseSensitivity = isAllLower(_searchPattern) ? Qt::CaseInsensitive : Qt::CaseSensitive;
-    auto i = currentIndex();
-    while (true) {
-        if (!i.isValid()) {
-            break;
-        }
-        else if (i.data(Qt::DisplayRole).toString().startsWith(_searchPattern, caseSensitivity)) {
-            // found a match, so select it
-            setCurrentIndex(i);
-            break;
-        }
-        else if (nextSibling(i) != currentIndex()) { // if the next sibling (row) is the current index,
-            i = nextSibling(i);                      // then we've found nothing and wrapped around
-        }
-        else {
-            break;
-        }
+    auto next = _searchInReverse ? previousSibling : nextSibling;
+    auto match = cirularSearch( [this](auto&& i){ return this->indexMatchsSearchPattern(i); }, currentIndex(), next);
+    if (match.first) {
+        setCurrentIndex(match.second);
     }
 }
 
 /*
-searches for the next occurrence of `_searchPattern`
+searches forward for the next occurrence of `_searchPattern`
 */
 void tffm::FileManager::searchNext() {
-    // search for the next occurrence of the pattern
-    Qt::CaseSensitivity caseSensitivity = isAllLower(_searchPattern) ? Qt::CaseInsensitive : Qt::CaseSensitive;
-    auto i = currentIndex();
-    while (true) {
-        i = nextSibling(i);
-        if (!i.isValid() || i == currentIndex()) { // if we're back to the current index,
-            break;                                 // then we've found nothing and wrapped around
-        }
-        else if (i.data(Qt::DisplayRole).toString().startsWith(_searchPattern, caseSensitivity)) {
-            // found a match, so select it
-            setCurrentIndex(i);
-            break;
-        }
+    auto next = _searchInReverse ? previousSibling : nextSibling;
+
+    // start search from the next node to ignore the curren on in case it matches the search
+    auto match = cirularSearch( [this](auto&& i){ return this->indexMatchsSearchPattern(i); }, next(currentIndex()), next);
+    if (match.first) {
+        setCurrentIndex(match.second);
+    }
+}
+
+/*
+searches backward for the next occurrence of `_searchPattern`
+*/
+void tffm::FileManager::searchPrevious() {
+    auto next = _searchInReverse ? nextSibling : previousSibling;
+
+    // start search from the next node to ignore the curren on in case it matches the search
+    auto match = cirularSearch( [this](auto&& i){ return this->indexMatchsSearchPattern(i); }, next(currentIndex()), next);
+    if (match.first) {
+        setCurrentIndex(match.second);
     }
 }
 
