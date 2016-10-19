@@ -77,6 +77,9 @@ class tffm::FileManager : public QListView {
         void searchPrevious();
         /*  searches for the previous occurrence of `_searchPattern`*/
 
+        void toggleHidden();
+        /*  toggle whether hidden files are shown */
+
     protected:
         void keyPressEvent(QKeyEvent* event) override;
         void moveSelection(QAbstractItemView::CursorAction action);

@@ -70,6 +70,8 @@ tffm::FileManager::FileManager(QWidget* parent) : QListView{parent}, _keyBinding
     _keyBindings.add(QKeySequence{Qt::Key_N}, SLOT(searchNext()));
     _keyBindings.add(QKeySequence{Qt::SHIFT + Qt::Key_N}, SLOT(searchPrevious()));
 
+    _keyBindings.add(QKeySequence{Qt::Key_Period, Qt::Key_Period}, SLOT(toggleHidden()));
+
     // connect signals to slots
     connect(_fsModel.get(), SIGNAL(directoryLoaded(QString)), this, SLOT(selectFirstChildIfNeeded(QString)));
 
@@ -180,6 +182,14 @@ void tffm::FileManager::searchPrevious() {
     if (match.first) {
         setCurrentIndex(match.second);
     }
+}
+
+/*
+toggle whether hidden files are shown
+*/
+void tffm::FileManager::toggleHidden() {
+    auto f = QDir::AllEntries | QDir::NoDotAndDotDot | ( _fsModel->filter() & QDir::Hidden ? (QDir::Filter)0x0 : QDir::Hidden);
+    _fsModel->setFilter(f);
 }
 
 /*

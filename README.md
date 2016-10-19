@@ -21,6 +21,7 @@ Here, different keybindings that do the same thing are separated by spaces
 | `N`         | Find previous occurrence of search  | Whatever `n` does but backwards. |
 | `gg` home   | Go to first item                    |                          |
 | `G` end     | Go to last item                     |                          |
+| `..`        | Toggle hidden items                 | Show/hide hidden files and directories. |
 
 ## License:
 
