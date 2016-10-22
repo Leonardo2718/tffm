@@ -137,25 +137,26 @@ void tffm::FileManager::openCurrent() {
     }
 }
 
+
 /*
-searches for the next of occurence of `pattern`, processing it
-(removing leading character, assuming it came from a command)
-and assigning it to `_searchPAttern`
+handles a command entered by the user
 */
-void tffm::FileManager::searchFor(QString const& pattern) {
-    if (pattern.isEmpty()) return;
+void tffm::FileManager::handleCommand(QString const& command) {
+    if (command.isEmpty()) return;
 
-    // process `pattern`
-    _searchPattern = pattern;
-    _searchPattern.remove(0, 1); // remove first character (the slash)
-    _searchInReverse = (pattern[0] == '?');
-    _searchCaseSensitivity = isAllLower(_searchPattern) ? Qt::CaseInsensitive : Qt::CaseSensitive;
+    // process `command`
+    if (command[0] == '/' || command[0] == '?') { // if is search command
+        _searchPattern = command;
+        _searchPattern.remove(0, 1); // remove first character (the '/' or '?')
+        _searchInReverse = (command[0] == '?');
+        _searchCaseSensitivity = isAllLower(_searchPattern) ? Qt::CaseInsensitive : Qt::CaseSensitive;
 
-    // search for an occurrence of the pattern
-    auto next = _searchInReverse ? previousSibling : nextSibling;
-    auto match = cirularSearch( [this](auto&& i){ return this->indexMatchsSearchPattern(i); }, currentIndex(), next);
-    if (match.first) {
-        setCurrentIndex(match.second);
+        // search for an occurrence of the pattern
+        auto next = _searchInReverse ? previousSibling : nextSibling;
+        auto match = cirularSearch( [this](auto&& i){ return this->indexMatchsSearchPattern(i); }, currentIndex(), next);
+        if (match.first) {
+            setCurrentIndex(match.second);
+        }
     }
 }
 

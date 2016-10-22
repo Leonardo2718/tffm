@@ -44,7 +44,7 @@ tffm::MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
     _mainLayout->setMargin(0);
 
     // connect signals to slots
-    connect(_inputLine.get(), SIGNAL(textChanged(QString)), _fileManager.get(), SLOT(searchFor(QString)));
+    connect(_inputLine.get(), SIGNAL(textChanged(QString)), _fileManager.get(), SLOT(handleCommand(QString)));
 
     // set widgets
     _mainLayout->addWidget(_fileManager.get());

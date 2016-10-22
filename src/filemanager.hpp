@@ -65,17 +65,14 @@ class tffm::FileManager : public QListView {
 
         void openCurrent();
 
-        void searchFor(const QString& pattern);
-        /*  searches for the next of occurrence of `pattern`, processing it
-            (removing leading character, assuming it came from a command)
-            and assigning it to `_searchPattern`
-        */
+        void handleCommand(const QString& command);
+        /*  handles a command entered by the user */
 
         void searchNext();
-        /*  searches for the next occurrence of `_searchPattern`*/
+        /*  searches for the next occurrence of `_searchPattern` */
 
         void searchPrevious();
-        /*  searches for the previous occurrence of `_searchPattern`*/
+        /*  searches for the previous occurrence of `_searchPattern` */
 
         void toggleHidden();
         /*  toggle whether hidden files are shown */

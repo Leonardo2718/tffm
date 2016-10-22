@@ -57,10 +57,7 @@ class tffm::InputLine : public QLineEdit {
         void tryLeave(QString const& text);
 
     private:
-        enum class Mode {None, Command, Search, ReverseSearch};
-
         KeyBindingTable _keyBindings;
-        Mode _currentMode;
 };
 
 #endif // INPUTLINE_HPP

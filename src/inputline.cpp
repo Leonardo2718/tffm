@@ -37,7 +37,7 @@ License:
 // Qt classes
 #include <QKeyEvent>
 
-tffm::InputLine::InputLine(QWidget* parent) : QLineEdit{parent}, _keyBindings{parent, this}, _currentMode{Mode::None} {
+tffm::InputLine::InputLine(QWidget* parent) : QLineEdit{parent}, _keyBindings{parent, this} {
     // set key bindings
     _keyBindings.add(QKeySequence{Qt::Key_Slash}, SLOT(enterSearchMode()));
     _keyBindings.add(QKeySequence{Qt::Key_Question}, SLOT(enterReverseSearchMode()));
@@ -55,18 +55,15 @@ void tffm::InputLine::enterSearchMode() {
     grabKeyboard();
     setHidden(false);
     setText("/");
-    _currentMode = Mode::Search;
 }
 
 void tffm::InputLine::enterReverseSearchMode() {
     grabKeyboard();
     setHidden(false);
     setText("?");
-    _currentMode = Mode::ReverseSearch;
 }
 
 void tffm::InputLine::leave() {
-    _currentMode = Mode::None;
     setHidden(true);
     clear();
     releaseKeyboard();
