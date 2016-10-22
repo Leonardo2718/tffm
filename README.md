@@ -14,7 +14,7 @@ Here, different keybindings that do the same thing are separated by spaces
 | `k` &uarr;  | Move up one item                    |                          |
 | `h` &larr;  | Move up one directory               | (`cd ..`)                |
 | `l` &rarr;  | Enter selected directory            | If the selection is not a directory, nothing happens.|
-| `o` space   | Open selected item                  | If the selection is a directory, it is entered (same as `l` or &rarr;). If it's a file, it's opened using `xdg-open`. |
+| `o` space enter | Open selected item                  | If the selection is a directory, it is entered (same as `l` or &rarr;). If it's a file, it's opened using `xdg-open`. |
 | `/`         | Search current directory            | Opens a prompt and searches the current directory for the text entered. |
 | `?`         | search current directory in reverse |                          |
 | `n`         | Find next occurrences of search     | Finds the next occurrence of a search, in the same order as the command used to start the search (sing `/` or `?`) |

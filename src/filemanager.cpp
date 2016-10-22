@@ -66,6 +66,7 @@ tffm::FileManager::FileManager(QWidget* parent) : QListView{parent}, _keyBinding
 
     _keyBindings.add(QKeySequence{Qt::Key_O}, SLOT(openCurrent()));
     _keyBindings.add(QKeySequence{Qt::Key_Space}, SLOT(openCurrent()));
+    _keyBindings.addEnterKeyBinding( [this](){ openCurrent(); } );
 
     _keyBindings.add(QKeySequence{Qt::Key_N}, SLOT(searchNext()));
     _keyBindings.add(QKeySequence{Qt::SHIFT + Qt::Key_N}, SLOT(searchPrevious()));
