@@ -65,9 +65,6 @@ class tffm::FileManager : public QListView {
 
         void openCurrent();
 
-        void handleCommand(const QString& command);
-        /*  handles a command entered by the user */
-
         void searchNext();
         /*  searches for the next occurrence of `_searchPattern` */
 
@@ -76,6 +73,12 @@ class tffm::FileManager : public QListView {
 
         void toggleHidden();
         /*  toggle whether hidden files are shown */
+
+        void handleCommandUpdate(const QString& command);
+        /*  handles a command entery as it's being typed by the user */
+
+        void handleCommand(const QString& command);
+        /*  handles a command entered by the user */
 
     protected:
         void keyPressEvent(QKeyEvent* event) override;
@@ -91,6 +94,11 @@ class tffm::FileManager : public QListView {
 
         void change_directory(QString const& path);
         /*  changes the directory being displayed to `path` */
+
+        static bool beginsWith(QString const& str, QString const& pattern);
+        /*  returns true iff the first n characters of `str` are the same as the
+            characters in `pattern` where n is the length of `pattern`
+        */
 
         /*
         searches for the next occurrence of `_searchPattern`
@@ -113,8 +121,6 @@ class tffm::FileManager : public QListView {
         bool indexMatchsSearchPattern(const QModelIndex& i) {
             return i.data(Qt::DisplayRole).toString().startsWith(_searchPattern, _searchCaseSensitivity);
         }
-
-        // some convienience functions
 
         template <typename QSTRING>
         static bool isAllLower(QSTRING&& s){

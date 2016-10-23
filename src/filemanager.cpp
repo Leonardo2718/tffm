@@ -38,6 +38,8 @@ License:
 #include <QKeySequence>
 #include <QDesktopServices>
 #include <QRegularExpression>
+#include <QFileInfo>
+#include <QDir>
 #include <QDebug>
 
 tffm::FileManager::FileManager(QWidget* parent) : QListView{parent}, _keyBindings{this} {
@@ -137,29 +139,6 @@ void tffm::FileManager::openCurrent() {
     }
 }
 
-
-/*
-handles a command entered by the user
-*/
-void tffm::FileManager::handleCommand(QString const& command) {
-    if (command.isEmpty()) return;
-
-    // process `command`
-    if (command[0] == '/' || command[0] == '?') { // if is search command
-        _searchPattern = command;
-        _searchPattern.remove(0, 1); // remove first character (the '/' or '?')
-        _searchInReverse = (command[0] == '?');
-        _searchCaseSensitivity = isAllLower(_searchPattern) ? Qt::CaseInsensitive : Qt::CaseSensitive;
-
-        // search for an occurrence of the pattern
-        auto next = _searchInReverse ? previousSibling : nextSibling;
-        auto match = cirularSearch( [this](auto&& i){ return this->indexMatchsSearchPattern(i); }, currentIndex(), next);
-        if (match.first) {
-            setCurrentIndex(match.second);
-        }
-    }
-}
-
 /*
 searches forward for the next occurrence of `_searchPattern`
 */
@@ -195,6 +174,52 @@ void tffm::FileManager::toggleHidden() {
 }
 
 /*
+handles a command entery as it's being typed by the user
+*/
+void tffm::FileManager::handleCommandUpdate(QString const& command) {
+    if (command.isEmpty()) return;
+
+    // process `command`
+    if (command[0] == '/' || command[0] == '?') { // if is search command
+        _searchPattern = command;
+        _searchPattern.remove(0, 1); // remove first character (the '/' or '?')
+        _searchInReverse = (command[0] == '?');
+        _searchCaseSensitivity = isAllLower(_searchPattern) ? Qt::CaseInsensitive : Qt::CaseSensitive;
+
+        // search for an occurrence of the pattern
+        auto next = _searchInReverse ? previousSibling : nextSibling;
+        auto match = cirularSearch( [this](auto&& i){ return this->indexMatchsSearchPattern(i); }, currentIndex(), next);
+        if (match.first) {
+            setCurrentIndex(match.second);
+        }
+    }
+}
+
+/*
+handles a command entered by the user
+*/
+void tffm::FileManager::handleCommand(const QString& command) {
+    if (command.isEmpty()) return;
+
+    // process `command`
+    if (beginsWith(command, ":cd")) {   // if is cd command
+        auto path = command;
+        path = path.remove(0, 3).simplified();
+        QDir dir = _fsModel->rootDirectory();
+        if (dir.cd(path)) {
+            change_directory(dir.absolutePath());
+        }
+        else {
+            qDebug() << "error:" << path << "does not exist";
+        }
+    }
+}
+
+void tffm::FileManager::moveSelection(QAbstractItemView::CursorAction action) {
+    setCurrentIndex(moveCursor(action, Qt::NoModifier));
+}
+
+/*
 changes the directory being displayed to `path`
 */
 void tffm::FileManager::change_directory(QString const& path) {
@@ -202,8 +227,22 @@ void tffm::FileManager::change_directory(QString const& path) {
     setRootIndex(rootIndex);
 }
 
-void tffm::FileManager::moveSelection(QAbstractItemView::CursorAction action) {
-    setCurrentIndex(moveCursor(action, Qt::NoModifier));
+/*
+returns true iff the first n characters of `str` are the same as the
+characters in `pattern` where n is the length of `pattern`
+*/
+bool tffm::FileManager::beginsWith(QString const& str, QString const& pattern) {
+    if (pattern.size() > str.size()) {
+        return false;
+    }
+
+    for (auto i = 0; i < pattern.size(); ++i) {
+        if (str[i] != pattern[i]) {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 void tffm::FileManager::selectFirstChildIfNeeded(const QString& path) {

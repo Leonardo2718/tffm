@@ -41,8 +41,9 @@ tffm::InputLine::InputLine(QWidget* parent) : QLineEdit{parent}, _keyBindings{pa
     // set key bindings
     _keyBindings.add(QKeySequence{Qt::Key_Slash}, SLOT(enterSearchMode()));
     _keyBindings.add(QKeySequence{Qt::Key_Question}, SLOT(enterReverseSearchMode()));
+    _keyBindings.add(QKeySequence{Qt::Key_Colon}, SLOT(enterCommandMode()));
     _keyBindings.add(QKeySequence{Qt::Key_Escape}, SLOT(leave()));
-    _keyBindings.addEnterKeyBinding( [this](){this->leave();} );
+    _keyBindings.addEnterKeyBinding( [this](){this->sendCommand();} );
 
     // connect signals to slots
     connect(this, SIGNAL(textChanged(QString)), this, SLOT(tryLeave(QString)));
@@ -63,6 +64,12 @@ void tffm::InputLine::enterReverseSearchMode() {
     setText("?");
 }
 
+void tffm::InputLine::enterCommandMode() {
+    grabKeyboard();
+    setHidden(false);
+    setText(":");
+}
+
 void tffm::InputLine::leave() {
     setHidden(true);
     clear();
@@ -73,4 +80,9 @@ void tffm::InputLine::tryLeave(QString const& text) {
     if (text == "") {
         leave();
     }
+}
+
+void tffm::InputLine::sendCommand() {
+    emit commandEntered(text());
+    leave();
 }

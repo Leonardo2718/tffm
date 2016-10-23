@@ -50,11 +50,16 @@ class tffm::InputLine : public QLineEdit {
     public:
         explicit InputLine(QWidget *parent);
 
+    signals:
+        void commandEntered(QString const& command);
+
     public slots:
         void enterSearchMode();
         void enterReverseSearchMode();
+        void enterCommandMode();
         void leave();
         void tryLeave(QString const& text);
+        void sendCommand();
 
     private:
         KeyBindingTable _keyBindings;
