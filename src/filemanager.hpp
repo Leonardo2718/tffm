@@ -54,7 +54,6 @@ class tffm::FileManager : public QListView {
     public:
         explicit FileManager(QWidget* parent = nullptr);
 
-    public slots:
         void moveSelectionUp();
         void moveSelectionDown();
         void moveSelectionTop();
@@ -91,6 +90,8 @@ class tffm::FileManager : public QListView {
         QString _searchPattern;
         bool _searchInReverse;
         Qt::CaseSensitivity _searchCaseSensitivity;
+
+        void selectFirstChildIfNeeded(const QString& path);
 
         void change_directory(QString const& path);
         /*  changes the directory being displayed to `path` */
@@ -141,9 +142,6 @@ class tffm::FileManager : public QListView {
         static QModelIndex previousSibling(QModelIndex const& i) {
             return i.sibling(i.row() > 0 ? (i.row() - 1) : i.model()->rowCount(i.parent()) - 1, i.column());
         }
-
-    private slots:
-        void selectFirstChildIfNeeded(const QString& path);
 };
 
 #endif // FILEMANAGER

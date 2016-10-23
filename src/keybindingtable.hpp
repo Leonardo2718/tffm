@@ -38,6 +38,7 @@ License:
 #include <memory>
 #include <vector>
 #include <functional>
+#include <utility>
 
 // Qt classes
 #include <QObject>
@@ -69,28 +70,46 @@ class tffm::EnterKeyReceiver : public QObject {
 
 class tffm::KeyBindingTable {
     public:
-        explicit KeyBindingTable(QWidget* emitter, QWidget* reciever = nullptr) :_emitter{emitter}, _reciever{reciever ? reciever : emitter} {}
+        explicit KeyBindingTable(QWidget* listener) : _listener{listener} {}
 
-        void add(QKeySequence const& keys, const char* slot) {
-            auto s = std::make_unique<QShortcut>(keys, _emitter);
-            QObject::connect(s.get(), SIGNAL(activated()), _reciever, slot);
-            //connect(s.get(), SIGNAL(activatedAmbiguously()), _emitter, slot);
-            _keyBindings.push_back(std::move(s));
-        }
+        template <typename CallableHandler>
+        void add(QKeySequence const& keys, CallableHandler&& handler);
+
+        template <typename Handler, typename Callable>
+        void add(QKeySequence const& keys, Handler&& handler, Callable&& f);
+
+        void add(QKeySequence const& keys, const char* handler);
+
+        void add(QKeySequence const& keys, QObject* handler, const char* f);
 
         /*  a special function is needed to handle the `Enter` key, which need an event filter to be handled */
         void addEnterKeyBinding(EnterKeyReceiver::Callable f) {
             auto r = std::make_unique<EnterKeyReceiver>(f);
-            _emitter->installEventFilter(r.get());
+            _listener->installEventFilter(r.get());
             _enterKeyReceivers.push_back(std::move(r));
         }
 
     private:
 
-        QWidget* _emitter;
-        QWidget* _reciever;
+        QWidget* _listener;
         std::vector<std::unique_ptr<QShortcut>> _keyBindings;
         std::vector<std::unique_ptr<EnterKeyReceiver>> _enterKeyReceivers;
 };
+
+template <typename CallableHandler>
+void tffm::KeyBindingTable::add(QKeySequence const& keys, CallableHandler&& handler) {
+    auto s = std::make_unique<QShortcut>(keys, _listener);
+    QObject::connect(s.get(), &QShortcut::activated, std::forward<CallableHandler>(handler));
+    //QObject::connect(s.get(), &QShortcut::activatedAmbiguously, std::forward<CallableHandler>(handler));
+    _keyBindings.push_back(std::move(s));
+}
+
+template <typename Handler, typename Callable>
+void tffm::KeyBindingTable::add(QKeySequence const& keys, Handler&& handler, Callable&& f) {
+    auto s = std::make_unique<QShortcut>(keys, _listener);
+    QObject::connect(s.get(), &QShortcut::activated, std::forward<Handler>(handler), std::forward<Callable>(f));
+    //QObject::connect(s.get(), &QShortcut::activatedAmbiguously, std::forward<Handler>(handler), std::forward<Callable>(f));
+    _keyBindings.push_back(std::move(s));
+}
 
 #endif // KEYBINDINGTABLE_HPP

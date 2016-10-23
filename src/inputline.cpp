@@ -37,16 +37,13 @@ License:
 // Qt classes
 #include <QKeyEvent>
 
-tffm::InputLine::InputLine(QWidget* parent) : QLineEdit{parent}, _keyBindings{parent, this} {
+tffm::InputLine::InputLine(QWidget* parent) : QLineEdit{parent}, _keyBindings{this} {
     // set key bindings
-    _keyBindings.add(QKeySequence{Qt::Key_Slash}, SLOT(enterSearchMode()));
-    _keyBindings.add(QKeySequence{Qt::Key_Question}, SLOT(enterReverseSearchMode()));
-    _keyBindings.add(QKeySequence{Qt::Key_Colon}, SLOT(enterCommandMode()));
-    _keyBindings.add(QKeySequence{Qt::Key_Escape}, SLOT(leave()));
-    _keyBindings.addEnterKeyBinding( [this](){this->sendCommand();} );
+    _keyBindings.add(QKeySequence{Qt::Key_Escape}, this, &InputLine::leave);
 
     // connect signals to slots
-    connect(this, SIGNAL(textChanged(QString)), this, SLOT(tryLeave(QString)));
+    connect(this, &InputLine::textChanged, this, &InputLine::tryLeave);
+    connect(this, &InputLine::returnPressed, this, &InputLine::sendCommand);
 
     // setup widget
     setHidden(true);

@@ -43,6 +43,7 @@ License:
 
 #include "filemanager.hpp"
 #include "inputline.hpp"
+#include "keybindingtable.hpp"
 
 namespace tffm { class MainWindow; }
 
@@ -54,9 +55,8 @@ class tffm::MainWindow : public QMainWindow {
 
     signals:
 
-    public slots:
-
     private:
+        tffm::KeyBindingTable _keyBindings;
         std::unique_ptr<QWidget> _centralWidget;
         std::unique_ptr<QVBoxLayout> _mainLayout;
         std::unique_ptr<FileManager> _fileManager;

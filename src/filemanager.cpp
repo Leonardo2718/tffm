@@ -54,29 +54,29 @@ tffm::FileManager::FileManager(QWidget* parent) : QListView{parent}, _keyBinding
     setSelectionMode(QAbstractItemView::SingleSelection);
 
     // configure key bindings
-    _keyBindings.add(QKeySequence{Qt::Key_Right}, SLOT(enterSelectedDirectory()));
-    _keyBindings.add(QKeySequence{Qt::Key_L}, SLOT(enterSelectedDirectory()));
+    _keyBindings.add(QKeySequence{Qt::Key_Right}, this, &FileManager::enterSelectedDirectory);
+    _keyBindings.add(QKeySequence{Qt::Key_L}, this, &FileManager::enterSelectedDirectory);
 
-    _keyBindings.add(QKeySequence{Qt::Key_J}, SLOT(moveSelectionDown()));
-    _keyBindings.add(QKeySequence{Qt::Key_K}, SLOT(moveSelectionUp()));
+    _keyBindings.add(QKeySequence{Qt::Key_J}, this, &FileManager::moveSelectionDown);
+    _keyBindings.add(QKeySequence{Qt::Key_K}, this, &FileManager::moveSelectionUp);
 
-    _keyBindings.add(QKeySequence{Qt::Key_Left}, SLOT(cdUp()));
-    _keyBindings.add(QKeySequence{Qt::Key_H}, SLOT(cdUp()));
+    _keyBindings.add(QKeySequence{Qt::Key_Left}, this, &FileManager::cdUp);
+    _keyBindings.add(QKeySequence{Qt::Key_H}, this, &FileManager::cdUp);
 
-    _keyBindings.add(QKeySequence{Qt::Key_G, Qt::Key_G}, SLOT(moveSelectionTop()));
-    _keyBindings.add(QKeySequence{Qt::SHIFT + Qt::Key_G}, SLOT(moveSelectionBottom()));
+    _keyBindings.add(QKeySequence{Qt::Key_G, Qt::Key_G}, this, &FileManager::moveSelectionTop);
+    _keyBindings.add(QKeySequence{Qt::SHIFT + Qt::Key_G}, this, &FileManager::moveSelectionBottom);
 
-    _keyBindings.add(QKeySequence{Qt::Key_O}, SLOT(openCurrent()));
-    _keyBindings.add(QKeySequence{Qt::Key_Space}, SLOT(openCurrent()));
+    _keyBindings.add(QKeySequence{Qt::Key_O}, this, &FileManager::openCurrent);
+    _keyBindings.add(QKeySequence{Qt::Key_Space}, this, &FileManager::openCurrent);
     _keyBindings.addEnterKeyBinding( [this](){ openCurrent(); } );
 
-    _keyBindings.add(QKeySequence{Qt::Key_N}, SLOT(searchNext()));
-    _keyBindings.add(QKeySequence{Qt::SHIFT + Qt::Key_N}, SLOT(searchPrevious()));
+    _keyBindings.add(QKeySequence{Qt::Key_N}, this, &FileManager::searchNext);
+    _keyBindings.add(QKeySequence{Qt::SHIFT + Qt::Key_N}, this, &FileManager::searchPrevious);
 
-    _keyBindings.add(QKeySequence{Qt::Key_Period, Qt::Key_Period}, SLOT(toggleHidden()));
+    _keyBindings.add(QKeySequence{Qt::Key_Period, Qt::Key_Period}, this, &FileManager::toggleHidden);
 
     // connect signals to slots
-    connect(_fsModel.get(), SIGNAL(directoryLoaded(QString)), this, SLOT(selectFirstChildIfNeeded(QString)));
+    connect(_fsModel.get(), &QFileSystemModel::directoryLoaded, this, &FileManager::selectFirstChildIfNeeded);
 
     // move to home directory
     change_directory(QDir::homePath());

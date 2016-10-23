@@ -50,3 +50,14 @@ bool tffm::EnterKeyReceiver::eventFilter(QObject* obj, QEvent* event) {
     }
     return false;
 }
+
+void tffm::KeyBindingTable::add(QKeySequence const& keys, const char* handler) {
+    add(keys, static_cast<QObject*>(_listener), handler);
+}
+
+void tffm::KeyBindingTable::add(QKeySequence const& keys, QObject* handler, const char* f) {
+    auto s = std::make_unique<QShortcut>(keys, _listener);
+    QObject::connect(s.get(), SIGNAL(activated), handler, f);
+    //connect(s.get(), SIGNAL(activatedAmbiguously()), std::forward<Handler>(handler), std::forward<Callable>(f));
+    _keyBindings.push_back(std::move(s));
+}
