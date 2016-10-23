@@ -145,7 +145,7 @@ searches forward for the next occurrence of `_searchPattern`
 void tffm::FileManager::searchNext() {
     auto next = _searchInReverse ? previousSibling : nextSibling;
 
-    // start search from the next node to ignore the curren on in case it matches the search
+    // start search from the next node to ignore the current one in case it matches the search
     auto match = cirularSearch( [this](auto&& i){ return this->indexMatchsSearchPattern(i); }, next(currentIndex()), next);
     if (match.first) {
         setCurrentIndex(match.second);
@@ -158,7 +158,7 @@ searches backward for the next occurrence of `_searchPattern`
 void tffm::FileManager::searchPrevious() {
     auto next = _searchInReverse ? nextSibling : previousSibling;
 
-    // start search from the next node to ignore the curren on in case it matches the search
+    // start search from the next node to ignore the current one in case it matches the search
     auto match = cirularSearch( [this](auto&& i){ return this->indexMatchsSearchPattern(i); }, next(currentIndex()), next);
     if (match.first) {
         setCurrentIndex(match.second);
@@ -202,7 +202,7 @@ void tffm::FileManager::handleCommand(const QString& command) {
     if (command.isEmpty()) return;
 
     // process `command`
-    if (beginsWith(command, ":cd")) {   // if is cd command
+    if (command.startsWith(":cd")) {   // if is cd command
         auto path = command;
         path = path.remove(0, 3).simplified();
         QDir dir = _fsModel->rootDirectory();
@@ -225,24 +225,6 @@ changes the directory being displayed to `path`
 void tffm::FileManager::change_directory(QString const& path) {
     auto rootIndex = _fsModel->setRootPath(path);
     setRootIndex(rootIndex);
-}
-
-/*
-returns true iff the first n characters of `str` are the same as the
-characters in `pattern` where n is the length of `pattern`
-*/
-bool tffm::FileManager::beginsWith(QString const& str, QString const& pattern) {
-    if (pattern.size() > str.size()) {
-        return false;
-    }
-
-    for (auto i = 0; i < pattern.size(); ++i) {
-        if (str[i] != pattern[i]) {
-            return false;
-        }
-    }
-
-    return true;
 }
 
 void tffm::FileManager::selectFirstChildIfNeeded(const QString& path) {

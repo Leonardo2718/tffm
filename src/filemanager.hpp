@@ -96,11 +96,6 @@ class tffm::FileManager : public QListView {
         void change_directory(QString const& path);
         /*  changes the directory being displayed to `path` */
 
-        static bool beginsWith(QString const& str, QString const& pattern);
-        /*  returns true iff the first n characters of `str` are the same as the
-            characters in `pattern` where n is the length of `pattern`
-        */
-
         /*
         searches for the next occurrence of `_searchPattern`
         */
@@ -131,14 +126,10 @@ class tffm::FileManager : public QListView {
             return true;
         }
 
-        //template <typename QMODELINDEX>
-        //static QModelIndex nextSibling(QMODELINDEX&& i) {
         static QModelIndex nextSibling(QModelIndex const& i) {
             return i.sibling((i.row() + 1) % i.model()->rowCount(i.parent()), i.column());
         }
 
-        //template <typename QMODELINDEX>
-        //static QModelIndex previousSibling(QMODELINDEX&& i) {
         static QModelIndex previousSibling(QModelIndex const& i) {
             return i.sibling(i.row() > 0 ? (i.row() - 1) : i.model()->rowCount(i.parent()) - 1, i.column());
         }
