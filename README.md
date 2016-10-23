@@ -22,6 +22,16 @@ Here, different keybindings that do the same thing are separated by spaces
 | `gg` home   | Go to first item                    |                          |
 | `G` end     | Go to last item                     |                          |
 | `..`        | Toggle hidden items                 | Show/hide hidden files and directories. |
+| `:`         | Enter command mode                  | See Commands section.    |
+
+## Commands
+
+Type `:` to enter command mode. In command mode, you can enter commands that will be executed
+by tffm. The following commands are currently supported:
+
+| Command     | Description                                                    |
+|:------------|:---------------------------------------------------------------|
+| `cd PATH`   | Changes the current directory to `PATH`. `PATH` can be a relative or absolute directory path. If `PATH` does not exist, nothing happens. Spaces in `PATH` *do not* need to be escaped. |
 
 ## License:
 
