@@ -44,6 +44,7 @@ License:
 #include <QStringList>
 #include <QApplication>
 #include <QClipboard>
+#include <QPair>
 #include <QDebug>
 
 tffm::FileManager::FileManager(QWidget* parent) : QListView{parent}, _keyBindings{this} {
@@ -80,6 +81,7 @@ tffm::FileManager::FileManager(QWidget* parent) : QListView{parent}, _keyBinding
     _keyBindings.add(QKeySequence{Qt::Key_Period, Qt::Key_Period}, this, &FileManager::toggleHidden);
 
     _keyBindings.add(QKeySequence{Qt::Key_Y, Qt::Key_Y}, this, &FileManager::copySelected);
+    _keyBindings.add(QKeySequence{Qt::Key_P}, this, &FileManager::putCopy);
 
     // connect signals to slots
     connect(_fsModel.get(), &QFileSystemModel::directoryLoaded, this, &FileManager::selectFirstChildIfNeeded);
@@ -193,6 +195,20 @@ void tffm::FileManager::copySelected() {
 }
 
 /*
+makes copys of the paths in the clipboard in the current directory
+*/
+void tffm::FileManager::putCopy() {
+    auto paths = QApplication::clipboard()->text().split(':');
+    auto info = QFileInfo{};
+    for (auto&& path : paths) {
+        info.setFile(path);
+        if (info.exists()) {
+            copyRecursively(info.absoluteFilePath(), _fsModel->rootPath() + QChar('/') + info.fileName());
+        }
+    }
+}
+
+/*
 handles a command entery as it's being typed by the user
 */
 void tffm::FileManager::handleCommandUpdate(QString const& command) {
@@ -244,6 +260,43 @@ changes the directory being displayed to `path`
 void tffm::FileManager::change_directory(QString const& path) {
     auto rootIndex = _fsModel->setRootPath(path);
     setRootIndex(rootIndex);
+}
+
+/*
+copies a file system item from `src` to `dest`, recursively if needed
+*/
+bool tffm::FileManager::copyRecursively(QString const& src, QString const& dest) {
+    QList<QPair<QString,QString>> copyops;
+    copyops.push_back(qMakePair(src, dest));
+    QFileInfo srcInfo;
+    while (!copyops.empty()) {
+        auto op = copyops.back();
+        copyops.pop_back();
+        srcInfo.setFile(op.first);
+        if (srcInfo.isFile()) {
+            if (!QFile::copy(op.first, op.second)) {
+                return false;
+            }
+        }
+        else if (srcInfo.isDir()) {
+            QDir targetDir{op.second};
+            targetDir.cdUp();
+            if (!targetDir.mkdir(QFileInfo(op.second).fileName())) {
+                return false;
+            }
+            QDir sourceDir{op.first};
+            auto fileNames = sourceDir.entryList(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot | QDir::Hidden | QDir::System);
+            for (auto&& fileName : fileNames) {
+                const QString newsrc = src + QChar('/') + fileName;
+                const QString newdest = dest + QChar('/') + fileName;
+                copyops.push_front(qMakePair(newsrc, newdest));
+            }
+        }
+        else {
+            return false;
+        }
+    }
+    return true;
 }
 
 void tffm::FileManager::selectFirstChildIfNeeded(const QString& path) {

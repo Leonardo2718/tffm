@@ -76,6 +76,9 @@ class tffm::FileManager : public QListView {
         void copySelected();
         /*  copies the path(s) of the currently selected item(s) to the clipboard */
 
+        void putCopy();
+        /*  makes copys of the paths in the clipboard in the current directory */
+
         void handleCommandUpdate(const QString& command);
         /*  handles a command entery as it's being typed by the user */
 
@@ -98,6 +101,9 @@ class tffm::FileManager : public QListView {
 
         void change_directory(QString const& path);
         /*  changes the directory being displayed to `path` */
+
+        static bool copyRecursively(QString const& src, QString const& dest);
+        /*  copies a file system item from `src` to `dest`, recursively if needed */
 
         /*
         searches for the next occurrence of `_searchPattern`
