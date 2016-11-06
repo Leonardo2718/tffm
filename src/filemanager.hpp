@@ -79,6 +79,9 @@ class tffm::FileManager : public QListView {
         void putCopy();
         /*  makes copys of the paths in the clipboard in the current directory */
 
+        void removeSelected();
+        /*  removes the selected items from the file system */
+
         void handleCommandUpdate(const QString& command);
         /*  handles a command entery as it's being typed by the user */
 

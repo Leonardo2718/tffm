@@ -25,6 +25,7 @@ Here, different keybindings that do the same thing are separated by spaces
 | `:`         | Enter command mode                  | See Commands section.    |
 | `yy`        | Copy currently selected items to clipboard | Put the paths of the currently selected items (separated by `:`s) into CLIPBOARD. |
 | `p`         | Put/past items from clipboard       | Items are put in current directory. |
+| `dd`        | Delete selected items               |                          |
 
 ## Commands
 

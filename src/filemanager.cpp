@@ -45,6 +45,7 @@ License:
 #include <QApplication>
 #include <QClipboard>
 #include <QPair>
+#include <QMessageBox>
 #include <QDebug>
 
 tffm::FileManager::FileManager(QWidget* parent) : QListView{parent}, _keyBindings{this} {
@@ -82,6 +83,8 @@ tffm::FileManager::FileManager(QWidget* parent) : QListView{parent}, _keyBinding
 
     _keyBindings.add(QKeySequence{Qt::Key_Y, Qt::Key_Y}, this, &FileManager::copySelected);
     _keyBindings.add(QKeySequence{Qt::Key_P}, this, &FileManager::putCopy);
+
+    _keyBindings.add(QKeySequence{Qt::Key_D, Qt::Key_D}, this, &FileManager::removeSelected);
 
     // connect signals to slots
     connect(_fsModel.get(), &QFileSystemModel::directoryLoaded, this, &FileManager::selectFirstChildIfNeeded);
@@ -204,6 +207,22 @@ void tffm::FileManager::putCopy() {
         info.setFile(path);
         if (info.exists()) {
             copyRecursively(info.absoluteFilePath(), _fsModel->rootPath() + QChar('/') + info.fileName());
+        }
+    }
+}
+
+/*  removes the selected items from the file system */
+void tffm::FileManager::removeSelected() {
+    auto indexes = selectedIndexes();
+    auto paths = QStringList{};
+    for (auto&& i : indexes) {
+        paths << _fsModel->filePath(i);
+    }
+    auto message = tr("Are you sure you want to delete:\n  %0").arg(paths.join("\n  "));
+    auto answer = QMessageBox::question(this, "Delete these items?", message);
+    if (answer == QMessageBox::Yes) {
+        for (auto&& i : indexes) {
+            _fsModel->remove(i);
         }
     }
 }
