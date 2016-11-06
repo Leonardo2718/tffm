@@ -23,6 +23,7 @@ Here, different keybindings that do the same thing are separated by spaces
 | `G` end     | Go to last item                     |                          |
 | `..`        | Toggle hidden items                 | Show/hide hidden files and directories. |
 | `:`         | Enter command mode                  | See Commands section.    |
+| `yy`        | Copy currently selected item to clipboard | Copies the paths of currently selected items. |
 
 ## Commands
 

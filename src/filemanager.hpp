@@ -73,6 +73,9 @@ class tffm::FileManager : public QListView {
         void toggleHidden();
         /*  toggle whether hidden files are shown */
 
+        void copySelected();
+        /*  copies the path(s) of the currently selected item(s) to the clipboard */
+
         void handleCommandUpdate(const QString& command);
         /*  handles a command entery as it's being typed by the user */
 

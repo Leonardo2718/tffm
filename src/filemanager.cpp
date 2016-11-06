@@ -40,6 +40,10 @@ License:
 #include <QRegularExpression>
 #include <QFileInfo>
 #include <QDir>
+#include <QString>
+#include <QStringList>
+#include <QApplication>
+#include <QClipboard>
 #include <QDebug>
 
 tffm::FileManager::FileManager(QWidget* parent) : QListView{parent}, _keyBindings{this} {
@@ -74,6 +78,8 @@ tffm::FileManager::FileManager(QWidget* parent) : QListView{parent}, _keyBinding
     _keyBindings.add(QKeySequence{Qt::SHIFT + Qt::Key_N}, this, &FileManager::searchPrevious);
 
     _keyBindings.add(QKeySequence{Qt::Key_Period, Qt::Key_Period}, this, &FileManager::toggleHidden);
+
+    _keyBindings.add(QKeySequence{Qt::Key_Y, Qt::Key_Y}, this, &FileManager::copySelected);
 
     // connect signals to slots
     connect(_fsModel.get(), &QFileSystemModel::directoryLoaded, this, &FileManager::selectFirstChildIfNeeded);
@@ -171,6 +177,19 @@ toggle whether hidden files are shown
 void tffm::FileManager::toggleHidden() {
     auto f = QDir::AllEntries | QDir::NoDotAndDotDot | ( _fsModel->filter() & QDir::Hidden ? (QDir::Filter)0x0 : QDir::Hidden);
     _fsModel->setFilter(f);
+}
+
+/*
+copies the path(s) of the currently selected item(s) to the clipboard
+*/
+void tffm::FileManager::copySelected() {
+    auto selection = QStringList{};
+    for (auto&& i : selectedIndexes()) {
+        selection << _fsModel->filePath(i);
+    }
+
+    auto clipboard = QApplication::clipboard();
+    clipboard->setText(selection.join(':'));
 }
 
 /*
