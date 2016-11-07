@@ -122,14 +122,7 @@ void tffm::FileManager::enterSelectedDirectory() {
     auto selectedPath = _fsModel->filePath(currentIndex());
     change_directory(selectedPath);
 
-    // row count is only 0 if current directory hasn't
-    // been loaded yet or if it's empty; assume the first
-    if (_fsModel->rowCount(rootIndex()) == 0) {
-        _pathWaitingToBeLoaded = selectedPath;
-    }
-    else {
-        setCurrentIndex(rootIndex().child(0,0));
-    }
+    updateCurrentIndex(selectedPath);
 }
 
 void tffm::FileManager::cdUp() {
@@ -261,7 +254,9 @@ void tffm::FileManager::handleCommand(const QString& command) {
         path = path.remove(0, 3).simplified();
         QDir dir = _fsModel->rootDirectory();
         if (dir.cd(path)) {
-            change_directory(dir.absolutePath());
+            auto path = dir.absolutePath();
+            change_directory(path);
+            updateCurrentIndex(path);
         }
         else {
             qDebug() << "error:" << path << "does not exist";
@@ -316,6 +311,17 @@ bool tffm::FileManager::copyRecursively(QString const& src, QString const& dest)
         }
     }
     return true;
+}
+
+void tffm::FileManager::updateCurrentIndex(QString const& currentPath) {
+    // row count is only 0 if current directory hasn't
+    // been loaded yet or if it's empty; assume the first
+    if (_fsModel->rowCount(rootIndex()) == 0) {
+        _pathWaitingToBeLoaded = currentPath;
+    }
+    else {
+        setCurrentIndex(rootIndex().child(0,0));
+    }
 }
 
 void tffm::FileManager::selectFirstChildIfNeeded(const QString& path) {

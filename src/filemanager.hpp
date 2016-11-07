@@ -100,6 +100,8 @@ class tffm::FileManager : public QListView {
         bool _searchInReverse;
         Qt::CaseSensitivity _searchCaseSensitivity;
 
+        void updateCurrentIndex(const QString& currentPath);
+
         void selectFirstChildIfNeeded(const QString& path);
 
         void change_directory(QString const& path);
